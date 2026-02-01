@@ -1,0 +1,11 @@
+Lista:
+
+- 2x condensadores de 22 pF
+- 16x resistencias de 330 ohmios
+- 4x resistencias de 4,7 kohmios
+- 1x PIC18F4321 + zocalo
+- 16x LED (rosa si está disponible, rojo si no)
+- 1x LM016L
+- 1x potenciómetro de 10 kΩ
+- 1x oscilador de cristal de 10 MHz
+- 1x switch
