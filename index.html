@@ -35,13 +35,38 @@
             margin-bottom: 20px;
         }
 
+        /* --- NEW SPLASH SCREEN STYLES --- */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ffdde1; /* Matches body background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999; /* Ensures it sits on top of everything */
+        }
+        
+        #splash-screen h1 {
+            font-size: 3.5rem; /* Make it a bit bigger for impact */
+            animation: fadeIn 2s; /* Optional: smooth fade in */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* --- ORIGINAL STYLES --- */
         .gif-container img {
-            width: 100%;             /* Keeps it responsive */
-        max-width: 150px;        /* ADD THIS: Limits the width */
-        max-height: 150px;       /* UPDATE THIS: Makes the height smaller */
-        object-fit: contain;     /* Ensures the image doesn't get distorted */
-        border-radius: 10px;
-        margin-bottom: 20px;
+            width: 100%;             
+            max-width: 150px;       
+            max-height: 150px;       
+            object-fit: contain;    
+            border-radius: 10px;
+            margin-bottom: 20px;
         }
 
         .btn-group {
@@ -59,14 +84,13 @@
             border-radius: 50px;
             cursor: pointer;
             transition: transform 0.2s; 
-            /* Removed transition for left/top so the movement is instant and snappy */
         }
 
         #yesBtn {
             background-color: #28a745;
             color: white;
             box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2);
-            z-index: 20; /* Keep Yes button above if they overlap */
+            z-index: 20; 
         }
 
         #yesBtn:hover {
@@ -80,6 +104,11 @@
             box-shadow: 0 4px 6px rgba(220, 53, 69, 0.2);
             position: relative; 
             z-index: 15;
+        }
+
+        /* Hide Question Screen Initially */
+        #question-screen {
+            display: none; 
         }
 
         /* Message Page Styles */
@@ -97,8 +126,13 @@
 </head>
 <body>
 
+    <!-- 1. THE NEW SPLASH SCREEN -->
+    <div id="splash-screen">
+        <h1>Aleksandra...</h1>
+    </div>
+
     <div class="container">
-        <!-- Screen 1: The Question -->
+        <!-- Screen 2: The Question (Initially Hidden) -->
         <div id="question-screen">
             <div class="gif-container">
                 <img src="heart_11186871.gif" alt="Cute Hamster">
@@ -110,11 +144,11 @@
             </div>
         </div>
 
-        <!-- Screen 2: The Success Message -->
+        <!-- Screen 3: The Success Message -->
         <div id="success-message">
-            <!-- <div class="gif-container">
+            <div class="gif-container">
                 <img src="waffascraffa-hamster-meme.gif" alt="Heart">
-            </div> -->
+            </div> 
             <h1>BRAOOO BE! ❤️</h1>
             <p class="custom-message">
                 Can't wait to celebrate with you☝️☝️☝️ <br>
@@ -128,62 +162,55 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 
     <script>
+        const splashScreen = document.getElementById('splash-screen');
+        const questionScreen = document.getElementById('question-screen');
         const yesBtn = document.getElementById('yesBtn');
         const noBtn = document.getElementById('noBtn');
-        const questionScreen = document.getElementById('question-screen');
         const successMessage = document.getElementById('success-message');
 
+        // --- NEW: TIMEOUT FOR SPLASH SCREEN ---
+        // Wait 3000 milliseconds (3 seconds) then switch screens
+        setTimeout(() => {
+            splashScreen.style.display = 'none';   // Hide "Aleksandra..."
+            questionScreen.style.display = 'block'; // Show "Will you be my Valentine?"
+        }, 3000);
+
+
+        // --- ORIGINAL BUTTON LOGIC ---
         function moveButton() {
-            // 1. Get current button position
-            // We use getBoundingClientRect to know exactly where it is on screen right now
             const rect = noBtn.getBoundingClientRect();
-            
-            // 2. Define the "Jump" range
-            // Min: 100px (to ensure it clears the cursor)
-            // Max: 250px (to keep it nearby and not across the screen)
             const minMove = 50; 
             const maxMove = 100; 
 
-            // 3. Calculate random movement
-            // We determine a random offset for X and Y
-            // Math.random() < 0.5 ? -1 : 1  --> Randomly decides negative (left/up) or positive (right/down)
             const moveX = (Math.random() * (maxMove - minMove) + minMove) * (Math.random() < 0.5 ? -1 : 1);
             const moveY = (Math.random() * (maxMove - minMove) + minMove) * (Math.random() < 0.5 ? -1 : 1);
 
             let newX = rect.left + moveX;
             let newY = rect.top + moveY;
 
-            // 4. Boundary Checks (Don't let it leave the screen)
             const windowWidth = window.innerWidth;
             const windowHeight = window.innerHeight;
             const btnWidth = noBtn.offsetWidth;
             const btnHeight = noBtn.offsetHeight;
 
-            // If it goes off the left edge, move it to the right edge (and vice versa)
             if (newX < 0) newX = 10;
             if (newX > windowWidth - btnWidth) newX = windowWidth - btnWidth - 10;
             
-            // If it goes off the top edge, move it to the bottom
             if (newY < 0) newY = 10;
             if (newY > windowHeight - btnHeight) newY = windowHeight - btnHeight - 10;
 
-            // 5. Apply new position
-            // We switch to 'fixed' positioning so x/y coordinates work globally
             noBtn.style.position = 'fixed';
             noBtn.style.left = newX + 'px';
             noBtn.style.top = newY + 'px';
         }
 
-        // Trigger on hover (Desktop)
         noBtn.addEventListener('mouseover', moveButton);
         
-        // Trigger on touch (Mobile)
         noBtn.addEventListener('touchstart', (e) => {
             e.preventDefault(); 
             moveButton();
         });
 
-        // Yes Button Logic
         yesBtn.addEventListener('click', () => {
             questionScreen.style.display = 'none';
             successMessage.style.display = 'block';
