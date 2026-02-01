@@ -17,6 +17,7 @@
             overflow: hidden; 
         }
 
+        /* Container styles - we will control visibility via JS now */
         .container {
             text-align: center;
             background: white;
@@ -27,6 +28,16 @@
             width: 400px;
             position: relative;
             z-index: 10;
+            
+            /* Hidden initially to prevent the "empty box" glitch */
+            display: none; 
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        /* Class to fade things in */
+        .fade-in {
+            opacity: 1;
         }
 
         h1 {
@@ -47,31 +58,19 @@
             justify-content: center;
             align-items: center;
             z-index: 9999; 
-            /* Added transition for smooth fade out */
             transition: opacity 1s ease;
             opacity: 1; 
         }
         
         #splash-screen h1 {
             font-size: 3.5rem; 
+            color: #ff4d6d; 
             animation: fadeIn 2s; 
         }
 
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
-        }
-
-        /* --- SCREEN VISIBILITY CLASSES --- */
-        /* These handle the fading logic */
-        .screen-content {
-            display: none; /* Hidden by default */
-            opacity: 0;    /* Invisible by default */
-            transition: opacity 1s ease; /* Smooth fade effect */
-        }
-
-        .screen-content.visible {
-            opacity: 1; /* Fully visible */
         }
 
         /* --- IMAGES & BUTTONS --- */
@@ -127,6 +126,11 @@
             line-height: 1.6;
         }
 
+        /* Initially hide the success message content within the container */
+        #success-content {
+            display: none;
+        }
+
     </style>
 </head>
 <body>
@@ -136,24 +140,26 @@
         <h1>Aleksandra...</h1>
     </div>
 
-    <div class="container">
-        <!-- Screen 2: The Question (Has class 'screen-content') -->
-        <div id="question-screen" class="screen-content">
+    <!-- 2. MAIN CONTAINER (Initially Hidden) -->
+    <div class="container" id="main-container">
+        
+        <!-- Screen 2: The Question -->
+        <div id="question-content">
             <div class="gif-container">
                 <img src="heart_11186871.gif" alt="Cute Hamster">
             </div>
-            <h1>Aleksandra, will you be my Valentine?</h1>
+            <h1>Will you be my Valentine?</h1>
             <div class="btn-group">
                 <button id="yesBtn">Yes</button>
                 <button id="noBtn">No</button>
             </div>
         </div>
 
-        <!-- Screen 3: The Success Message (Has class 'screen-content') -->
-        <div id="success-message" class="screen-content">
-            <div class="gif-container">
+        <!-- Screen 3: The Success Message -->
+        <div id="success-content">
+            <!-- <div class="gif-container">
                 <img src="waffascraffa-hamster-meme.gif" alt="Heart">
-            </div> 
+            </div>  -->
             <h1>BRAOOO BE! ❤️</h1>
             <p class="custom-message">
                 Can't wait to celebrate with you☝️☝️☝️ <br>
@@ -161,6 +167,7 @@
                 Kiss Kiss 💋
             </p>
         </div>
+
     </div>
 
     <!-- Confetti Script -->
@@ -168,58 +175,51 @@
 
     <script>
         const splashScreen = document.getElementById('splash-screen');
-        const questionScreen = document.getElementById('question-screen');
-        const successMessage = document.getElementById('success-message');
+        const mainContainer = document.getElementById('main-container');
+        const questionContent = document.getElementById('question-content');
+        const successContent = document.getElementById('success-content');
         const yesBtn = document.getElementById('yesBtn');
         const noBtn = document.getElementById('noBtn');
 
-        // --- STEP 1: SPLASH -> QUESTION TRANSITION ---
+        // --- STEP 1: SPLASH -> MAIN CONTAINER TRANSITION ---
         setTimeout(() => {
             // 1. Fade out splash screen
             splashScreen.style.opacity = '0';
             
-            // 2. Wait 1 second for fade to finish, then hide it and show question
+            // 2. Wait 1s, hide splash, SHOW CONTAINER
             setTimeout(() => {
                 splashScreen.style.display = 'none';
                 
-                // Prepare question screen
-                questionScreen.style.display = 'block';
+                // Show the main container
+                mainContainer.style.display = 'block';
                 
-                // Small delay to allow browser to register 'display: block' before fading in
+                // Small delay to trigger CSS fade-in
                 setTimeout(() => {
-                    questionScreen.classList.add('visible');
+                    mainContainer.classList.add('fade-in');
                 }, 50);
-                
-            }, 1000); // Matches CSS transition time (1s)
+
+            }, 1000); 
         }, 3000); // 3 seconds initial wait
+
 
         // --- STEP 2: QUESTION -> SUCCESS TRANSITION ---
         yesBtn.addEventListener('click', () => {
-            // 1. Fade out question screen
-            questionScreen.classList.remove('visible'); // Removing this class sets opacity back to 0
+            
+            // 1. Swap content instantly (or you can fade the container out/in if preferred)
+            // Ideally, we keep the white box visible and just swap the text inside.
+            
+            questionContent.style.display = 'none';
+            successContent.style.display = 'block';
 
-            // 2. Wait 1 second for fade out
-            setTimeout(() => {
-                questionScreen.style.display = 'none';
-                
-                // Prepare success message
-                successMessage.style.display = 'block';
-                
-                // Fade in success message
-                setTimeout(() => {
-                    successMessage.classList.add('visible');
-                    
-                    // Fire confetti after it becomes visible
-                    confetti({
-                        particleCount: 150,
-                        spread: 70,
-                        origin: { y: 0.6 },
-                        colors: ['#ff4d6d', '#ffdde1', '#ffffff']
-                    });
-                }, 50);
-                
-            }, 1000);
+            // Fire confetti
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#ff4d6d', '#ffdde1', '#ffffff']
+            });
         });
+
 
         // --- ORIGINAL NO BUTTON LOGIC ---
         function moveButton() {
