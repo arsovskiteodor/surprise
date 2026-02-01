@@ -35,23 +35,26 @@
             margin-bottom: 20px;
         }
 
-        /* --- NEW SPLASH SCREEN STYLES --- */
+        /* --- SPLASH SCREEN STYLES --- */
         #splash-screen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #ffdde1; /* Matches body background */
+            background-color: #ffdde1; 
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 9999; /* Ensures it sits on top of everything */
+            z-index: 9999; 
+            /* Added transition for smooth fade out */
+            transition: opacity 1s ease;
+            opacity: 1; 
         }
         
         #splash-screen h1 {
-            font-size: 3.5rem; /* Make it a bit bigger for impact */
-            animation: fadeIn 2s; /* Optional: smooth fade in */
+            font-size: 3.5rem; 
+            animation: fadeIn 2s; 
         }
 
         @keyframes fadeIn {
@@ -59,7 +62,19 @@
             to { opacity: 1; }
         }
 
-        /* --- ORIGINAL STYLES --- */
+        /* --- SCREEN VISIBILITY CLASSES --- */
+        /* These handle the fading logic */
+        .screen-content {
+            display: none; /* Hidden by default */
+            opacity: 0;    /* Invisible by default */
+            transition: opacity 1s ease; /* Smooth fade effect */
+        }
+
+        .screen-content.visible {
+            opacity: 1; /* Fully visible */
+        }
+
+        /* --- IMAGES & BUTTONS --- */
         .gif-container img {
             width: 100%;             
             max-width: 150px;       
@@ -106,16 +121,6 @@
             z-index: 15;
         }
 
-        /* Hide Question Screen Initially */
-        #question-screen {
-            display: none; 
-        }
-
-        /* Message Page Styles */
-        #success-message {
-            display: none; 
-        }
-
         .custom-message {
             font-size: 1.2rem;
             color: #333;
@@ -126,14 +131,14 @@
 </head>
 <body>
 
-    <!-- 1. THE NEW SPLASH SCREEN -->
+    <!-- 1. SPLASH SCREEN -->
     <div id="splash-screen">
         <h1>Aleksandra...</h1>
     </div>
 
     <div class="container">
-        <!-- Screen 2: The Question (Initially Hidden) -->
-        <div id="question-screen">
+        <!-- Screen 2: The Question (Has class 'screen-content') -->
+        <div id="question-screen" class="screen-content">
             <div class="gif-container">
                 <img src="heart_11186871.gif" alt="Cute Hamster">
             </div>
@@ -144,8 +149,8 @@
             </div>
         </div>
 
-        <!-- Screen 3: The Success Message -->
-        <div id="success-message">
+        <!-- Screen 3: The Success Message (Has class 'screen-content') -->
+        <div id="success-message" class="screen-content">
             <div class="gif-container">
                 <img src="waffascraffa-hamster-meme.gif" alt="Heart">
             </div> 
@@ -164,19 +169,59 @@
     <script>
         const splashScreen = document.getElementById('splash-screen');
         const questionScreen = document.getElementById('question-screen');
+        const successMessage = document.getElementById('success-message');
         const yesBtn = document.getElementById('yesBtn');
         const noBtn = document.getElementById('noBtn');
-        const successMessage = document.getElementById('success-message');
 
-        // --- NEW: TIMEOUT FOR SPLASH SCREEN ---
-        // Wait 3000 milliseconds (3 seconds) then switch screens
+        // --- STEP 1: SPLASH -> QUESTION TRANSITION ---
         setTimeout(() => {
-            splashScreen.style.display = 'none';   // Hide "Aleksandra..."
-            questionScreen.style.display = 'block'; // Show "Will you be my Valentine?"
-        }, 3000);
+            // 1. Fade out splash screen
+            splashScreen.style.opacity = '0';
+            
+            // 2. Wait 1 second for fade to finish, then hide it and show question
+            setTimeout(() => {
+                splashScreen.style.display = 'none';
+                
+                // Prepare question screen
+                questionScreen.style.display = 'block';
+                
+                // Small delay to allow browser to register 'display: block' before fading in
+                setTimeout(() => {
+                    questionScreen.classList.add('visible');
+                }, 50);
+                
+            }, 1000); // Matches CSS transition time (1s)
+        }, 3000); // 3 seconds initial wait
 
+        // --- STEP 2: QUESTION -> SUCCESS TRANSITION ---
+        yesBtn.addEventListener('click', () => {
+            // 1. Fade out question screen
+            questionScreen.classList.remove('visible'); // Removing this class sets opacity back to 0
 
-        // --- ORIGINAL BUTTON LOGIC ---
+            // 2. Wait 1 second for fade out
+            setTimeout(() => {
+                questionScreen.style.display = 'none';
+                
+                // Prepare success message
+                successMessage.style.display = 'block';
+                
+                // Fade in success message
+                setTimeout(() => {
+                    successMessage.classList.add('visible');
+                    
+                    // Fire confetti after it becomes visible
+                    confetti({
+                        particleCount: 150,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                        colors: ['#ff4d6d', '#ffdde1', '#ffffff']
+                    });
+                }, 50);
+                
+            }, 1000);
+        });
+
+        // --- ORIGINAL NO BUTTON LOGIC ---
         function moveButton() {
             const rect = noBtn.getBoundingClientRect();
             const minMove = 50; 
@@ -195,7 +240,6 @@
 
             if (newX < 0) newX = 10;
             if (newX > windowWidth - btnWidth) newX = windowWidth - btnWidth - 10;
-            
             if (newY < 0) newY = 10;
             if (newY > windowHeight - btnHeight) newY = windowHeight - btnHeight - 10;
 
@@ -205,23 +249,11 @@
         }
 
         noBtn.addEventListener('mouseover', moveButton);
-        
         noBtn.addEventListener('touchstart', (e) => {
             e.preventDefault(); 
             moveButton();
         });
 
-        yesBtn.addEventListener('click', () => {
-            questionScreen.style.display = 'none';
-            successMessage.style.display = 'block';
-
-            confetti({
-                particleCount: 150,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#ff4d6d', '#ffdde1', '#ffffff']
-            });
-        });
     </script>
 </body>
 </html>
